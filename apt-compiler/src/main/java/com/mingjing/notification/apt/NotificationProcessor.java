@@ -39,7 +39,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 
 public class NotificationProcessor implements IProcessor {
 
-    private static final String packageName = "com.mingjing.notification.proxy";
+    private static String packageName = "com.mingjing.notification.proxy";
 
     @Override
     public void process(RoundEnvironment environment, AnnotationProcessor annotationProcessor) {
@@ -63,7 +63,6 @@ public class NotificationProcessor implements IProcessor {
 
         for (Element e : element.getEnclosedElements()) {
             if (e instanceof TypeElement) {
-//                annotationProcessor.mMessager.printMessage(Diagnostic.Kind.NOTE, "正在处理 type: " + e.toString());
                 processInterface((TypeElement) e, annotationProcessor);
             }
         }
@@ -74,18 +73,16 @@ public class NotificationProcessor implements IProcessor {
 
     private void processSingleInterface(TypeElement element, AnnotationProcessor annotationProcessor) {
         try {
-//        annotationProcessor.mMessager.printMessage(Diagnostic.Kind.NOTE, "正在处理 class: " + element.toString() + ",simpleName:" + element.getSimpleName());
             TypeSpec.Builder tb = TypeSpec.classBuilder(element.getSimpleName() + "_Proxy");
-//        annotationProcessor.mMessager.printMessage(Diagnostic.Kind.NOTE, "正在处理 class: " + element.toString() + ",simpleName:" + element.getSimpleName());
-//            Class superCls = Class.forName("com.mingjing.notification.proxy.BaseProxy");
-//            tb.superclass(superCls.getClass());
+            packageName = element.getQualifiedName().toString();
+            packageName = packageName.replace(".", "._");
             tb.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
             tb.addSuperinterface(TypeName.get(element.asType()));
-            tb.addField(FieldSpec.builder(Map.class,"mObservers",Modifier.PRIVATE,Modifier.FINAL).build());
+            tb.addField(FieldSpec.builder(Map.class, "mObservers", Modifier.PRIVATE, Modifier.FINAL).build());
 
             MethodSpec.Builder mb = MethodSpec.constructorBuilder();
             mb.addModifiers(Modifier.PUBLIC);
-            mb.addParameter(Map.class,"observers");
+            mb.addParameter(Map.class, "observers");
             mb.addStatement("mObservers = observers");
 
             tb.addMethod(mb.build());
@@ -94,7 +91,6 @@ public class NotificationProcessor implements IProcessor {
                 if (e instanceof ExecutableElement) {
                     ExecutableElement ee = (ExecutableElement) e;
 
-//                annotationProcessor.mMessager.printMessage(Diagnostic.Kind.NOTE, "正在处理 method: " + ee.toString() + ",simpleName:" + ee.getSimpleName());
 
                     MethodSpec.Builder builder = MethodSpec.methodBuilder(ee.getSimpleName().toString());
 
@@ -104,20 +100,16 @@ public class NotificationProcessor implements IProcessor {
                             sm.add(m);
                         }
                     }
-//                annotationProcessor.mMessager.printMessage(Diagnostic.Kind.NOTE, "正在处理 Modifier:" + sm);
                     builder.addModifiers(sm);
 
                     TypeMirror returnTm = ee.getReturnType();
-//                annotationProcessor.mMessager.printMessage(Diagnostic.Kind.NOTE, "正在处理 return type: " + ee.toString() + ",return:" + returnTm);
                     builder.returns(TypeName.get(returnTm));
 
                     List<? extends VariableElement> variableElements = ee.getParameters();
-//                annotationProcessor.mMessager.printMessage(Diagnostic.Kind.NOTE, "正在处理 variable: " + ee.toString() + ",ves:" + variableElements.toString());
 
                     List<String> vns = new ArrayList<>();
                     for (VariableElement ve : variableElements) {
 
-//                    annotationProcessor.mMessager.printMessage(Diagnostic.Kind.NOTE, "正在处理 variable: " + ee.toString() + ",ve:" + ve.asType().toString());
 
                         Modifier[] ms = ve.getModifiers().toArray(new Modifier[]{});
                         builder.addParameter(ParameterSpec.builder(TypeName.get(ve.asType()), ve.getSimpleName().toString(), ms).build());
@@ -142,11 +134,15 @@ public class NotificationProcessor implements IProcessor {
                     statementBuilder.append("item).");
                     statementBuilder.append(ee.getSimpleName());
                     statementBuilder.append("(");
+                    boolean hasParameters = false;
                     for (String s : vns) {
                         statementBuilder.append(s);
                         statementBuilder.append(",");
+                        hasParameters = true;
                     }
-                    statementBuilder.deleteCharAt(statementBuilder.length() - 1);
+                    if (hasParameters) {
+                        statementBuilder.deleteCharAt(statementBuilder.length() - 1);
+                    }
                     statementBuilder.append(");\n      }\n }\n");
                     cb.add(statementBuilder.toString());
 
@@ -154,7 +150,6 @@ public class NotificationProcessor implements IProcessor {
 
                     tb.addMethod(builder.build());
 
-//                annotationProcessor.mMessager.printMessage(Diagnostic.Kind.NOTE, "method is: " + builder.build());
                 }
             }
 
@@ -163,6 +158,5 @@ public class NotificationProcessor implements IProcessor {
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        annotationProcessor.mMessager.printMessage(Diagnostic.Kind.NOTE, "class is: " + tb.build());
     }
 }

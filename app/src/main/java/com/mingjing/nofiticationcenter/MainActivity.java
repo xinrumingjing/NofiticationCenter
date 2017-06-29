@@ -35,7 +35,7 @@ public class MainActivity extends Activity implements TestCallback {
         findViewById(R.id.btn_test).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NotificationCenter.INSTANCE.getObserver(TestCallback.class).onStudentListAck(20);
+                NotificationCenter.INSTANCE.getObserver(TestCallback.class).onTest();
             }
         });
     }
@@ -53,5 +53,10 @@ public class MainActivity extends Activity implements TestCallback {
             teachers.add(new Teacher());
         }
         return teachers;
+    }
+
+    @Override
+    public void onTest() {
+        Toast.makeText(this, "on test", Toast.LENGTH_LONG).show();
     }
 }

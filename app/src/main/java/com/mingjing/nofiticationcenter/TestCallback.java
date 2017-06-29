@@ -13,4 +13,6 @@ public interface TestCallback {
     void onTeacherListAck(List<Teacher> teachers);
 
     void onStudentListAck(int size);
+
+    void onTest();
 }

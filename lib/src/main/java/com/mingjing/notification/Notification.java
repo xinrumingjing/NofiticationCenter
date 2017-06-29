@@ -27,7 +27,8 @@ class Notification<T> {
     public T getProxy() {
         if (mProxy == null) {
             try {
-                String clsName = "com.mingjing.notification.proxy." +mCallbackCls.getSimpleName() + "_Proxy";
+                String clsName = mCallbackCls.getName();
+                clsName = clsName.replace(".","._") +  "." + mCallbackCls.getSimpleName() + "_Proxy";
                 Constructor constructor = Class.forName(clsName).getConstructor(Map.class);
                 mProxy = (T) constructor.newInstance(mObservers);
             } catch (Exception e) {
